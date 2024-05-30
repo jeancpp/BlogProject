@@ -1,25 +1,33 @@
 ﻿using Blog.Models.Domain;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Models.ViewModels
 {
     public class AddBlogPostsRequest
     {
-
-            public string Heading { get; set; }
-            public string PageTitle { get; set; }
-            public string Content { get; set; }
-            public string ShortDescription { get; set; }
-            public string FeaturedImageUrl { get; set; }
-            public string UrlHandle { get; set; }
-            public DateTime PublishedDate { get; set; }
-            public string Author { get; set; }
-            public bool Visible { get; set; }
+        [Required]
+        public string Heading { get; set; }
+        [Required]
+        public string PageTitle { get; set; }
+        [Required]
+        public string Content { get; set; }
+        [Required]
+        public string ShortDescription { get; set; }
+        [Required]
+        public string FeaturedImageUrl { get; set; }
+        [Required]
+        public string UrlHandle { get; set; }
+        [Required]
+        public DateTime PublishedDate { get; set; }
+        [Required]
+        public string Author { get; set; }
+        [Required]
+        public bool Visible { get; set; }
 
         //Display created tags
-
+        [Required]
         public IEnumerable<SelectListItem> Tags { get; set; }
-
-        public string [] SelectedTags { get; set; } = Array.Empty<string>();
+        public string[] SelectedTags { get; set; } = Array.Empty<string>();
     }
 }

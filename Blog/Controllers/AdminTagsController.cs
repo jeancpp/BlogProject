@@ -2,11 +2,13 @@
 using Blog.Models.Domain;
 using Blog.Models.ViewModels;
 using Blog.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminTagsController : Controller
     {
         private readonly ITagRepository tagRepository;
@@ -15,6 +17,7 @@ namespace Blog.Controllers
             this.tagRepository = tagRepository;
         }
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Add()
         {
             return View();
@@ -24,6 +27,11 @@ namespace Blog.Controllers
         [ActionName("Add")]
         public async Task<IActionResult> Add(AddTagRequest addTagRequest)
         {
+            ValidateAddTagRequest(addTagRequest);
+            if (ModelState.IsValid == false)
+            {
+                return View();
+            }
             //Mapping AddTAgREquest to Tag domanin model
             var tag = new Tag
             {
@@ -37,9 +45,34 @@ namespace Blog.Controllers
 
         [HttpGet]
         [ActionName("List")]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(string? searchQuery,
+            string? sortBy,
+            string? sortDirection,
+            int pageSize =3, int pageNumber = 1)
         {
-            var tags = await tagRepository.GetAllAsync();
+
+            var totalRecords = await tagRepository.CountAsync();
+            var totalPages = Math.Ceiling((decimal)(totalRecords / pageSize));
+
+            if(pageNumber > totalPages)
+            {
+                pageNumber--;
+            }    
+
+            if(pageNumber < 1)
+            {
+                pageNumber++;
+            }
+
+            ViewBag.SearchQuery = searchQuery;
+            ViewBag.sortBy = sortBy;
+            ViewBag.sortDirection = sortDirection;
+            ViewBag.PageSize = pageSize;
+            ViewBag.PageNumber = pageNumber;
+
+            ViewBag.TotalPages = totalPages;
+            var tags = await tagRepository.GetAllAsync(searchQuery, sortBy, sortDirection, pageNumber, pageSize);
+
              return View(tags);
         }
 
@@ -66,6 +99,11 @@ namespace Blog.Controllers
         [ActionName("Edit")]
         public async Task<IActionResult> Edit(EditTagRequest editTagRequest)
         {
+            ValidateEditTagRequest(editTagRequest);
+            if (ModelState.IsValid == false)
+            {
+                return View();
+            }
             //Mapping AddTAgREquest to Tag domanin model
             var tag = new Tag
             {
@@ -97,6 +135,30 @@ namespace Blog.Controllers
 
 
             return RedirectToAction("Edit", new { id = editTagRequest.Id });
+        }
+
+        private void ValidateAddTagRequest(AddTagRequest addTagRequest)
+        {
+            if(addTagRequest.Name is not null && addTagRequest.DisplayName is not null)
+            {
+                if(addTagRequest.DisplayName == addTagRequest.Name)
+                {
+                    ModelState.AddModelError("DisplayName", "Name cannot be the same as DisplayName");
+                }
+
+            }
+        }
+
+        private void ValidateEditTagRequest(EditTagRequest editTagRequest)
+        {
+            if (editTagRequest.Name is not null && editTagRequest.DisplayName is not null)
+            {
+                if (editTagRequest.DisplayName == editTagRequest.Name)
+                {
+                    ModelState.AddModelError("DisplayName", "Name cannot be the same as DisplayName");
+                }
+
+            }
         }
     }
 }

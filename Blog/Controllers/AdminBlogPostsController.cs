@@ -1,11 +1,13 @@
 ﻿using Blog.Models.Domain;
 using Blog.Models.ViewModels;
 using Blog.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Blog.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminBlogPostsController : Controller
     {
         private readonly ITagRepository tagRepository;
@@ -32,6 +34,10 @@ namespace Blog.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddBlogPostsRequest addBlogPostsRequest)
         {
+            if (ModelState.IsValid == false)
+            {
+                return View();
+            }
             var blogPost = new BlogPost
             {
                 Heading = addBlogPostsRequest.Heading,

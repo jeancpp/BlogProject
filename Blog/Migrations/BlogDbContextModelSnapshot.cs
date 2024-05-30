@@ -67,6 +67,51 @@ namespace Blog.Migrations
                     b.ToTable("BlogPost");
                 });
 
+            modelBuilder.Entity("Blog.Models.Domain.BlogPostComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlogPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogPostComment");
+                });
+
+            modelBuilder.Entity("Blog.Models.Domain.BlogPostLike", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlogPostId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlogPostId");
+
+                    b.ToTable("BlogPostLike");
+                });
+
             modelBuilder.Entity("Blog.Models.Domain.Tag", b =>
                 {
                     b.Property<Guid>("Id")
@@ -101,6 +146,24 @@ namespace Blog.Migrations
                     b.ToTable("BlogPostTag");
                 });
 
+            modelBuilder.Entity("Blog.Models.Domain.BlogPostComment", b =>
+                {
+                    b.HasOne("Blog.Models.Domain.BlogPost", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Blog.Models.Domain.BlogPostLike", b =>
+                {
+                    b.HasOne("Blog.Models.Domain.BlogPost", null)
+                        .WithMany("Likes")
+                        .HasForeignKey("BlogPostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("BlogPostTag", b =>
                 {
                     b.HasOne("Blog.Models.Domain.BlogPost", null)
@@ -114,6 +177,13 @@ namespace Blog.Migrations
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Blog.Models.Domain.BlogPost", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }
